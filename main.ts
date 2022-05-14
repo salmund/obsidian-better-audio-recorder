@@ -8,9 +8,11 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
+	TAbstractFile,
+	TFile,
+	moment
 } from "obsidian";
 const { clipboard } = require("electron");
-import moment from "moment";
 
 interface BetterAudioRecorderSettings {
 	mySetting: string;
@@ -71,6 +73,7 @@ class AudioRecordModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		// const {titlelEl} = this;
+		let audio_modal = this;
 		let modal_title = contentEl.createEl("h2", {
 			text: "Audio Recorder Interface",
 		});
@@ -125,11 +128,19 @@ class AudioRecordModal extends Modal {
 		pauseButton.addEventListener("click", pauseRecording);
 
 		var save_button = contentEl.createEl("button", { text: "Save" });
+		var go_to_file = contentEl.createEl("button", {
+			text: "Open Recording File",
+		});
+
 		MainDiv.appendChild(save_button);
+		MainDiv.appendChild(go_to_file);
+
 		save_button.style.display = "none";
+		go_to_file.style.display = "none";
 
 		function startRecording() {
 			save_button.style.display = "none";
+			go_to_file.style.display = "none";
 			new Notice("Recording started !");
 			console.log("recordButton clicked");
 
@@ -253,22 +264,27 @@ class AudioRecordModal extends Modal {
 		}
 		async function createDownloadLink(blob: any) {
 			save_button.style.display = "inline";
-			var now = moment().format("YYYYMMwebmDDHHmm");
-			let recording_filename = `Recording-${now}.${extension}`;
+			var now = moment().format("YYYYMMwebmDDHHmmss");
+			var recording_filename = `Recording-${now}.${extension}`;
 			var url = URL.createObjectURL(blob);
 
 			save_button.addEventListener("click", () => {
 				blob.arrayBuffer().then((data) => {
-					let blobdata = data;
+					var blobdata = data;
 					console.log(blobdata);
 					app.vault.createBinary(`/${recording_filename}`, blobdata);
 					new Notice(
 						`${recording_filename} saved ! Link copied to clipboard`
 					);
 					clipboard.writeText(`![[${recording_filename}]]`);
+					go_to_file.style.display = "inline";
 				});
 			});
+			go_to_file.addEventListener('click',() => {
+				audio_modal.close();
+				app.vault.cachedRead(audio_tfile);
 
+			})
 			// let audio_tag = contentEl.createEl("audio"); -- décommenter permet de conserver les traces des audios
 			audio_tag.setAttribute("controls", "true");
 			audio_tag.setAttribute("src", url);
