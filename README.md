@@ -13,7 +13,7 @@
  ## How to use it
  
  - You have a microphone icon on the left pane
- - Open Audio Recorder Interface
+ - Open Audio Recorder Interface (in the commnad palette)
  
  # Demo
  
