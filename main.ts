@@ -10,7 +10,8 @@ import {
 	Setting,
 	TAbstractFile,
 	TFile,
-	moment
+	moment,
+	WorkspaceLeaf,
 } from "obsidian";
 const { clipboard } = require("electron");
 
@@ -267,12 +268,17 @@ class AudioRecordModal extends Modal {
 			var now = moment().format("YYYYMMwebmDDHHmmss");
 			var recording_filename = `Recording-${now}.${extension}`;
 			var url = URL.createObjectURL(blob);
-
+			var bau_audio_file: any;
+			var audio_tfile: any;
 			save_button.addEventListener("click", () => {
 				blob.arrayBuffer().then((data) => {
 					var blobdata = data;
 					console.log(blobdata);
-					app.vault.createBinary(`/${recording_filename}`, blobdata);
+					audio_tfile = app.vault
+						.createBinary(`/${recording_filename}`, blobdata)
+						.then((data_tfile) => {
+							bau_audio_file = data_tfile;
+						});
 					new Notice(
 						`${recording_filename} saved ! Link copied to clipboard`
 					);
@@ -280,11 +286,21 @@ class AudioRecordModal extends Modal {
 					go_to_file.style.display = "inline";
 				});
 			});
-			go_to_file.addEventListener('click',() => {
+			go_to_file.addEventListener("click", () => {
 				audio_modal.close();
-				app.vault.cachedRead(audio_tfile);
+				const active_leaf = app.workspace.activeLeaf;
+				var active_leaf_view_state = active_leaf.getViewState()
+				if(active_leaf_view_state.type != 'empty'){
+					console.log(active_leaf_view_state.type)
+					app.workspace.splitActiveLeaf().openFile(bau_audio_file);
+				}
+				else{
+					active_leaf.openFile(bau_audio_file);
+				}
+				// app.vault.cachedRead(bau_audio_file);
+				// app.vault.cachedRead(bau_audio_file);
+			});
 
-			})
 			// let audio_tag = contentEl.createEl("audio"); -- décommenter permet de conserver les traces des audios
 			audio_tag.setAttribute("controls", "true");
 			audio_tag.setAttribute("src", url);
