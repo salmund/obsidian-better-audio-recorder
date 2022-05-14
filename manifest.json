@@ -1,9 +1,9 @@
 {
 	"id": "obsidian-better-audio-recorder",
 	"name": "Better Audio Recorder",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"minAppVersion": "0.12.0",
-	"description": "An alternative to Obsidian's default voice recorder plugin. Thanks to me you can finally pause and resume!" ,
+	"description": "An alternative to Obsidian's default voice recorder plugin. Thanks to me you can finally pause and resume!",
 	"author": "Salmund",
 	"authorUrl": "https://github.com/salmund/obsidian-better-audio-recorder",
 	"isDesktopOnly": false
