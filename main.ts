@@ -15,19 +15,10 @@ import {
 } from "obsidian";
 const { clipboard } = require("electron");
 
-interface BetterAudioRecorderSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: BetterAudioRecorderSettings = {
-	mySetting: "default",
-};
-
 export default class BetterAudioRecorderPlugin extends Plugin {
 	settings: BetterAudioRecorderSettings;
 
 	async onload() {
-		await this.loadSettings();
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"microphone",
@@ -53,17 +44,6 @@ export default class BetterAudioRecorderPlugin extends Plugin {
 
 	onunload() {}
 
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData()
-		);
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
 }
 
 class AudioRecordModal extends Modal {
@@ -99,24 +79,10 @@ class AudioRecordModal extends Modal {
 
 		URL = window.URL || window.webkitURL;
 
-		var gumStream: any; //stream from getUserMedia()
-		var recorder: any; //MediaRecorder object
-		var chunks: any = []; //Array of chunks of audio data from the browser
-		var extension: any;
-
-		var recordButton = document.getElementsByClassName("startRecord")[0];
-		var stopButton = document.getElementsByClassName("stopRecord")[0];
-		var pauseButton = document.getElementsByClassName("pauseRecord")[0];
-
-		console.log(
-			"audio/webm:" +
-				MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-		);
-		// false on chrome, true on firefox
-		console.log(
-			"audio/ogg:" +
-				MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")
-		);
+		let gumStream: any; //stream from getUserMedia()
+		let recorder: any; //MediaRecorder object
+		let chunks: any = []; //Array of chunks of audio data from the browser
+		let extension: any;
 
 		if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
 			extension = "webm";
@@ -124,9 +90,9 @@ class AudioRecordModal extends Modal {
 			extension = "ogg";
 		}
 
-		recordButton.addEventListener("click", startRecording);
-		stopButton.addEventListener("click", stopRecording);
-		pauseButton.addEventListener("click", pauseRecording);
+		startRecord.addEventListener("click", startRecording);
+		stopReccord.addEventListener("click", stopRecording);
+		pauseRecord.addEventListener("click", pauseRecording);
 
 		var save_button = contentEl.createEl("button", { text: "Save" });
 		var go_to_file = contentEl.createEl("button", {
@@ -143,7 +109,6 @@ class AudioRecordModal extends Modal {
 			save_button.style.display = "none";
 			go_to_file.style.display = "none";
 			new Notice("Recording started !");
-			console.log("recordButton clicked");
 
 			/*
 				  Simple constraints object, for more advanced audio features see
@@ -156,9 +121,9 @@ class AudioRecordModal extends Modal {
 				  Disable the record button until we get a success or fail from getUserMedia()
 			  */
 
-			recordButton.disabled = true;
-			stopButton.disabled = false;
-			pauseButton.disabled = false;
+			startRecord.disabled = true;
+			stopRecord.disabled = false;
+			pauseRecord.disabled = false;
 
 			/*
 				  We're using the standard promise based getUserMedia()
@@ -229,9 +194,9 @@ class AudioRecordModal extends Modal {
 				})
 				.catch(function (err) {
 					//enable the record button if getUserMedia() fails
-					recordButton.disabled = false;
-					stopButton.disabled = true;
-					pauseButton.disabled = true;
+					startRecord.disabled = false;
+					stopRecord.disabled = true;
+					pauseRecord.disabled = true;
 				});
 		}
 		function pauseRecording() {
@@ -239,23 +204,23 @@ class AudioRecordModal extends Modal {
 			if (recorder.state == "recording") {
 				//pause
 				recorder.pause();
-				pauseButton.innerHTML = "Resume";
+				pauseRecord.innerHTML = "Resume";
 			} else if (recorder.state == "paused") {
 				//resume
 				recorder.resume();
-				pauseButton.innerHTML = "Pause";
+				pauseRecord.innerHTML = "Pause";
 			}
 		}
 		function stopRecording() {
 			console.log("stopButton clicked");
 
 			//disable the stop button, enable the record too allow for new recordings
-			stopButton.disabled = true;
-			recordButton.disabled = false;
-			pauseButton.disabled = true;
+			stopRecord.disabled = true;
+			startRecord.disabled = false;
+			pauseRecord.disabled = true;
 
 			//reset button just in case the recording is stopped while paused
-			pauseButton.innerHTML = "Pause";
+			pauseRecord.innerHTML = "Pause";
 
 			//tell the recorder to stop the recording
 			recorder.stop();
@@ -297,8 +262,6 @@ class AudioRecordModal extends Modal {
 				else{
 					active_leaf.openFile(bau_audio_file);
 				}
-				// app.vault.cachedRead(bau_audio_file);
-				// app.vault.cachedRead(bau_audio_file);
 			});
 
 			// let audio_tag = contentEl.createEl("audio"); -- décommenter permet de conserver les traces des audios
@@ -312,34 +275,3 @@ class AudioRecordModal extends Modal {
 		contentEl.empty();
 	}
 }
-
-// class BetterAudioRecorderSettingTab extends PluginSettingTab {
-// 	plugin: BetterAudioRecorderPlugin;
-
-// 	constructor(app: App, plugin: BetterAudioRecorderPlugin) {
-// 		super(app, plugin);
-// 		this.plugin = plugin;
-// 	}
-
-// 	display(): void {
-// 		const { containerEl } = this;
-
-// 		containerEl.empty();
-
-// 		containerEl.createEl("h2", { text: "Settings for my awesome plugin." });
-
-// 		new Setting(containerEl)
-// 			.setName("Setting #1")
-// 			.setDesc("It's a secret")
-// 			.addText((text) =>
-// 				text
-// 					.setPlaceholder("Enter your secret")
-// 					.setValue(this.plugin.settings.mySetting)
-// 					.onChange(async (value) => {
-// 						console.log("Secret: " + value);
-// 						this.plugin.settings.mySetting = value;
-// 						await this.plugin.saveSettings();
-// 					})
-// 			);
-// 	}
-// }
