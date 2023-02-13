@@ -1,5 +1,5 @@
 {
-	"name": "osbidian-better-audio-recorder",
+	"name": "obsidian-better-audio-recorder",
 	"version": "1.0.1",
 	"description": "A better alternative to Obsidian's defaut audio recorder.",
 	"main": "main.js",

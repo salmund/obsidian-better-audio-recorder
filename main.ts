@@ -91,7 +91,7 @@ class AudioRecordModal extends Modal {
 		}
 
 		startRecord.addEventListener("click", startRecording);
-		stopReccord.addEventListener("click", stopRecording);
+		stopRecord.addEventListener("click", stopRecording);
 		pauseRecord.addEventListener("click", pauseRecording);
 
 		var save_button = contentEl.createEl("button", { text: "Save" });
